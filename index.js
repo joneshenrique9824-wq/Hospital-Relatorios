@@ -1,9 +1,29 @@
+// ==========================================
+// BOT DE RELATÓRIOS HOSPITALARES
+// COMPLETO
+// ==========================================
+
 import "dotenv/config";
 import {
   Client,
   GatewayIntentBits,
   EmbedBuilder,
 } from "discord.js";
+
+// ==========================================
+// CONFIGURAÇÕES
+// ==========================================
+
+// ID DO SERVIDOR
+const SERVIDOR_ID = "1477683902041690342";
+
+// ID DO CANAL DOS RELATÓRIOS
+const CANAL_RELATORIOS =
+  "1477683906026406084";
+
+// ID DO CARGO PERMITIDO
+const CARGO_PERMITIDO =
+  "1490431614055088128";
 
 // ==========================================
 // CLIENT
@@ -18,46 +38,39 @@ const client = new Client({
 });
 
 // ==========================================
-// CONFIG
+// BOT ONLINE
 // ==========================================
 
-const SERVIDOR_ID = "1477683902041690342";
-
-const CANAL_RELATORIOS = "1477683906026406084";
-
-const CARGO_PERMITIDO = "1490431614055088128";
-
-const CARGOS_SUPERIORES = [
-  "Diretor",
-  "Vice-Diretor",
-  "Supervisor",
-  "Coordenador",
-];
-
-// ==========================================
-// READY
-// ==========================================
-
-client.once("ready", () => {
-  console.log(`✅ BOT ONLINE: ${client.user.tag}`);
+client.once("clientReady", () => {
+  console.log("=================================");
+  console.log("✅ BOT ONLINE");
+  console.log(`🤖 ${client.user.tag}`);
+  console.log("=================================");
 });
 
 // ==========================================
-// COMANDOS
+// SISTEMA
 // ==========================================
 
 client.on("messageCreate", async (message) => {
   try {
-    // IGNORAR BOT
+    // IGNORA BOTS
     if (message.author.bot) return;
 
-    // SERVIDOR
-    if (message.guild?.id !== SERVIDOR_ID)
+    // VERIFICA SERVIDOR
+    if (
+      message.guild?.id !== SERVIDOR_ID
+    ) {
       return;
+    }
 
-    // CANAL
-    if (message.channel.id !== CANAL_RELATORIOS)
+    // VERIFICA CANAL
+    if (
+      message.channel.id !==
+      CANAL_RELATORIOS
+    ) {
       return;
+    }
 
     // VERIFICA CARGO
     if (
@@ -69,32 +82,33 @@ client.on("messageCreate", async (message) => {
     }
 
     // ==========================================
-    // COMANDO AJUDA
+    // COMANDO HELP
     // ==========================================
 
-    if (message.content === "!ajuda") {
+    if (message.content === "!help") {
       const embed = new EmbedBuilder()
         .setColor("#0099ff")
         .setTitle("📋 Comandos do Bot")
         .setDescription(`
 📌 Comandos disponíveis:
 
-\`!painelrelatorio\`
+\`!painel\`
 ➡️ Envia o painel do sistema.
 
-\`!relatorio\`
-➡️ Cria um relatório.
+\`!relatorio @membro\`
+➡️ Cria um relatório automático.
 
 ━━━━━━━━━━━━━━━━━━
 
 📄 Exemplo:
 
-\`!relatorio @Mary Diretor Boa Excelente 6Meses Ótima MuitoBoa\`
+\`!relatorio @Mary\`
 
 ━━━━━━━━━━━━━━━━━━
 
 👑 Apenas superiores podem usar.
-        `);
+        `)
+        .setTimestamp();
 
       return message.channel.send({
         embeds: [embed],
@@ -105,7 +119,7 @@ client.on("messageCreate", async (message) => {
     // COMANDO PAINEL
     // ==========================================
 
-    if (message.content === "!painelrelatorio") {
+    if (message.content === "!painel") {
       const embed = new EmbedBuilder()
         .setColor("#ff0000")
         .setTitle(
@@ -159,57 +173,17 @@ Diretor Henrique
         "!relatorio"
       )
     ) {
-      const args =
-        message.content.split(" ");
-
+      // PEGA MEMBRO
       const membro =
         message.mentions.users.first();
 
       if (!membro) {
         return message.reply(
-          "❌ Mencione um membro."
+          "❌ Você precisa mencionar um membro."
         );
       }
 
-      const cargo = args[2];
-
-      if (!cargo) {
-        return message.reply(
-          "❌ Informe o cargo."
-        );
-      }
-
-      if (
-        !CARGOS_SUPERIORES.includes(
-          cargo
-        )
-      ) {
-        return message.reply(`
-❌ Cargo inválido.
-
-Permitidos:
-• Diretor
-• Vice-Diretor
-• Supervisor
-• Coordenador
-        `);
-      }
-
-      const frequencia =
-        args[3] || "Não informado";
-
-      const avaliacao =
-        args[4] || "Não informado";
-
-      const tempo =
-        args[5] || "Não informado";
-
-      const qualidade =
-        args[6] || "Não informado";
-
-      const desempenho =
-        args[7] || "Não informado";
-
+      // EMBED
       const embed = new EmbedBuilder()
         .setColor("#00ff88")
         .setTitle("📄 Relatório Geral")
@@ -218,45 +192,34 @@ Permitidos:
             dynamic: true,
           })
         )
-        .addFields(
-          {
-            name: "👤 Membro",
-            value: `${membro}`,
-            inline: true,
-          },
-          {
-            name: "📌 Cargo Superior",
-            value: cargo,
-            inline: true,
-          },
-          {
-            name:
-              "📊 Frequência dos membros",
-            value: frequencia,
-          },
-          {
-            name:
-              "🩺 Avaliação de desempenho",
-            value: avaliacao,
-          },
-          {
-            name:
-              "⏳ Tempo de serviço",
-            value: tempo,
-          },
-          {
-            name:
-              "✅ Qualidade de serviço",
-            value: qualidade,
-          },
-          {
-            name:
-              "⭐ Desempenho geral",
-            value: desempenho,
-          }
-        )
+        .setDescription(`
+📄 Relatório Geral — Membro: ${membro}
+
+📌 Cargo Atual:
+Médica
+
+📊 Frequência dos membros:
+Apresenta frequência razoável, mantendo presença consistente em serviço.
+
+🩺 Avaliação de desempenho:
+Boa comunicação, RP forte e respeito à hierarquia.
+
+⏳ Tempo de serviço:
+Tempo adequado ao cargo.
+
+✅ Qualidade de serviço:
+Atendimentos rápidos e eficientes.
+
+⭐ Desempenho geral:
+Boa profissional com potencial de crescimento.
+
+━━━━━━━━━━━━━━━━━━
+
+👑 Relatório realizado por:
+${message.author}
+        `)
         .setFooter({
-          text: `Relatório realizado por ${message.author.username}`,
+          text: "Hospital System",
         })
         .setTimestamp();
 
