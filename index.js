@@ -1,27 +1,31 @@
 // ==========================================
 // BOT DE RELATÓRIOS HOSPITALARES
-// COMPLETO
+// SISTEMA COMPLETO COM FORMULÁRIO
 // ==========================================
 
 import "dotenv/config";
+
 import {
   Client,
   GatewayIntentBits,
   EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
 } from "discord.js";
 
 // ==========================================
 // CONFIGURAÇÕES
 // ==========================================
 
-// ID DO SERVIDOR
 const SERVIDOR_ID = "1477683902041690342";
 
-// ID DO CANAL DOS RELATÓRIOS
 const CANAL_RELATORIOS =
   "1477683906026406084";
 
-// ID DO CARGO PERMITIDO
 const CARGO_PERMITIDO =
   "1490431614055088128";
 
@@ -38,39 +42,32 @@ const client = new Client({
 });
 
 // ==========================================
-// BOT ONLINE
+// ONLINE
 // ==========================================
 
 client.once("clientReady", () => {
   console.log("=================================");
-  console.log("✅ BOT ONLINE");
+  console.log(`✅ BOT ONLINE`);
   console.log(`🤖 ${client.user.tag}`);
   console.log("=================================");
 });
 
 // ==========================================
-// SISTEMA
+// MENSAGENS
 // ==========================================
 
 client.on("messageCreate", async (message) => {
   try {
-    // IGNORA BOTS
     if (message.author.bot) return;
 
-    // VERIFICA SERVIDOR
-    if (
-      message.guild?.id !== SERVIDOR_ID
-    ) {
+    if (message.guild?.id !== SERVIDOR_ID)
       return;
-    }
 
-    // VERIFICA CANAL
     if (
       message.channel.id !==
       CANAL_RELATORIOS
-    ) {
+    )
       return;
-    }
 
     // VERIFICA CARGO
     if (
@@ -82,41 +79,7 @@ client.on("messageCreate", async (message) => {
     }
 
     // ==========================================
-    // COMANDO HELP
-    // ==========================================
-
-    if (message.content === "!help") {
-      const embed = new EmbedBuilder()
-        .setColor("#0099ff")
-        .setTitle("📋 Comandos do Bot")
-        .setDescription(`
-📌 Comandos disponíveis:
-
-\`!painel\`
-➡️ Envia o painel do sistema.
-
-\`!relatorio @membro\`
-➡️ Cria um relatório automático.
-
-━━━━━━━━━━━━━━━━━━
-
-📄 Exemplo:
-
-\`!relatorio @Mary\`
-
-━━━━━━━━━━━━━━━━━━
-
-👑 Apenas superiores podem usar.
-        `)
-        .setTimestamp();
-
-      return message.channel.send({
-        embeds: [embed],
-      });
-    }
-
-    // ==========================================
-    // COMANDO PAINEL
+    // PAINEL
     // ==========================================
 
     if (message.content === "!painel") {
@@ -142,90 +105,213 @@ Essa aba será utilizada para:
 
 ━━━━━━━━━━━━━━━━━━
 
-📌 Apenas superiores podem realizar relatórios.
-
-• 👑 Diretor  
-• 🎖️ Vice-Diretor  
-• 🔱 Supervisor  
-• 📋 Coordenador  
-
-━━━━━━━━━━━━━━━━━━
-
-👑 Responsável:
-Diretor Henrique
+📌 Clique no botão abaixo para preencher um relatório.
         `)
         .setFooter({
           text: "Sistema Hospitalar",
         })
         .setTimestamp();
 
+      // BOTÃO
+      const row =
+        new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId("abrir_relatorio")
+            .setLabel("📄 Fazer Relatório")
+            .setStyle(ButtonStyle.Primary)
+        );
+
       return message.channel.send({
         embeds: [embed],
+        components: [row],
       });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+// ==========================================
+// BOTÃO
+// ==========================================
+
+client.on("interactionCreate", async (interaction) => {
+  try {
+    // ==========================================
+    // BOTÃO
+    // ==========================================
+
+    if (interaction.isButton()) {
+      if (
+        interaction.customId ===
+        "abrir_relatorio"
+      ) {
+        const modal = new ModalBuilder()
+          .setCustomId("modal_relatorio")
+          .setTitle("📄 Relatório Hospitalar");
+
+        // MEMBRO
+        const membro =
+          new TextInputBuilder()
+            .setCustomId("membro")
+            .setLabel("Nome do membro")
+            .setStyle(
+              TextInputStyle.Short
+            )
+            .setRequired(true);
+
+        // CARGO
+        const cargo =
+          new TextInputBuilder()
+            .setCustomId("cargo")
+            .setLabel("Cargo Atual")
+            .setStyle(
+              TextInputStyle.Short
+            )
+            .setRequired(true);
+
+        // FREQUÊNCIA
+        const frequencia =
+          new TextInputBuilder()
+            .setCustomId("frequencia")
+            .setLabel(
+              "Frequência dos membros"
+            )
+            .setStyle(
+              TextInputStyle.Paragraph
+            )
+            .setRequired(true);
+
+        // AVALIAÇÃO
+        const avaliacao =
+          new TextInputBuilder()
+            .setCustomId("avaliacao")
+            .setLabel(
+              "Avaliação de desempenho"
+            )
+            .setStyle(
+              TextInputStyle.Paragraph
+            )
+            .setRequired(true);
+
+        // DESEMPENHO
+        const desempenho =
+          new TextInputBuilder()
+            .setCustomId("desempenho")
+            .setLabel("Desempenho geral")
+            .setStyle(
+              TextInputStyle.Paragraph
+            )
+            .setRequired(true);
+
+        // LINHAS
+        const row1 =
+          new ActionRowBuilder().addComponents(
+            membro
+          );
+
+        const row2 =
+          new ActionRowBuilder().addComponents(
+            cargo
+          );
+
+        const row3 =
+          new ActionRowBuilder().addComponents(
+            frequencia
+          );
+
+        const row4 =
+          new ActionRowBuilder().addComponents(
+            avaliacao
+          );
+
+        const row5 =
+          new ActionRowBuilder().addComponents(
+            desempenho
+          );
+
+        modal.addComponents(
+          row1,
+          row2,
+          row3,
+          row4,
+          row5
+        );
+
+        return interaction.showModal(modal);
+      }
     }
 
     // ==========================================
-    // COMANDO RELATÓRIO
+    // MODAL
     // ==========================================
 
-    if (
-      message.content.startsWith(
-        "!relatorio"
-      )
-    ) {
-      // PEGA MEMBRO
-      const membro =
-        message.mentions.users.first();
+    if (interaction.isModalSubmit()) {
+      if (
+        interaction.customId ===
+        "modal_relatorio"
+      ) {
+        // PEGA DADOS
+        const membro =
+          interaction.fields.getTextInputValue(
+            "membro"
+          );
 
-      if (!membro) {
-        return message.reply(
-          "❌ Você precisa mencionar um membro."
-        );
-      }
+        const cargo =
+          interaction.fields.getTextInputValue(
+            "cargo"
+          );
 
-      // EMBED
-      const embed = new EmbedBuilder()
-        .setColor("#00ff88")
-        .setTitle("📄 Relatório Geral")
-        .setThumbnail(
-          membro.displayAvatarURL({
-            dynamic: true,
-          })
-        )
-        .setDescription(`
+        const frequencia =
+          interaction.fields.getTextInputValue(
+            "frequencia"
+          );
+
+        const avaliacao =
+          interaction.fields.getTextInputValue(
+            "avaliacao"
+          );
+
+        const desempenho =
+          interaction.fields.getTextInputValue(
+            "desempenho"
+          );
+
+        // EMBED
+        const embed = new EmbedBuilder()
+          .setColor("#00ff88")
+          .setTitle(
+            "📄 Relatório Geral"
+          )
+          .setDescription(`
 📄 Relatório Geral — Membro: ${membro}
 
 📌 Cargo Atual:
-Médica
+${cargo}
 
 📊 Frequência dos membros:
-Apresenta frequência razoável, mantendo presença consistente em serviço.
+${frequencia}
 
 🩺 Avaliação de desempenho:
-Boa comunicação, RP forte e respeito à hierarquia.
-
-⏳ Tempo de serviço:
-Tempo adequado ao cargo.
-
-✅ Qualidade de serviço:
-Atendimentos rápidos e eficientes.
+${avaliacao}
 
 ⭐ Desempenho geral:
-Boa profissional com potencial de crescimento.
+${desempenho}
 
 ━━━━━━━━━━━━━━━━━━
 
 👑 Relatório realizado por:
-${message.author}
-        `)
-        .setFooter({
-          text: "Hospital System",
-        })
-        .setTimestamp();
+${interaction.user}
+          `)
+          .setFooter({
+            text: "Sistema Hospitalar",
+          })
+          .setTimestamp();
 
-      return message.channel.send({
-        embeds: [embed],
-      });
+        await interaction.reply({
+          embeds: [embed],
+        });
+      }
     }
   } catch (err) {
     console.log(err);
