@@ -9,12 +9,14 @@ import {
 // CLIENT
 // ==========================================
 
+// REMOVIDO O GuildMembers
+// PARA NÃO DAR ERRO DE INTENTS
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers,
   ],
 });
 
@@ -22,19 +24,14 @@ const client = new Client({
 // CONFIGURAÇÕES
 // ==========================================
 
-// ID DO SERVIDOR
 const SERVIDOR_ID = "1477683902041690342";
 
-// ID DO BOT
-const BOT_ID = "1502475695329382481";
+const CANAL_RELATORIOS =
+  "1477683906026406084";
 
-// CANAL DE RELATÓRIOS
-const CANAL_RELATORIOS = "1477683906026406084";
+const CARGO_PERMITIDO =
+  "1490431614055088128";
 
-// CARGO QUE PODE USAR O BOT
-const CARGO_PERMITIDO = "1490431614055088128";
-
-// CARGOS SUPERIORES
 const CARGOS_SUPERIORES = [
   "Diretor",
   "Vice-Diretor",
@@ -48,59 +45,52 @@ const CARGOS_SUPERIORES = [
 
 client.once("ready", async () => {
   console.log("=================================");
-  console.log(`✅ BOT ONLINE: ${client.user.tag}`);
-  console.log(`🤖 ID DO BOT: ${BOT_ID}`);
-  console.log(`🏥 SERVIDOR: ${SERVIDOR_ID}`);
-  console.log("=================================");
-
-  // VERIFICA SERVIDOR
-  const guild = client.guilds.cache.get(
-    SERVIDOR_ID
-  );
-
-  if (!guild) {
-    console.log(
-      "❌ O bot não está no servidor configurado."
-    );
-    return;
-  }
-
   console.log(
-    `✅ Conectado ao servidor: ${guild.name}`
+    `✅ BOT ONLINE: ${client.user.tag}`
   );
+  console.log("=================================");
 });
 
 // ==========================================
-// SISTEMA DE MENSAGENS
+// SISTEMA
 // ==========================================
 
 client.on("messageCreate", async (message) => {
   try {
-    // IGNORA OUTROS SERVIDORES
-    if (message.guild?.id !== SERVIDOR_ID)
-      return;
-
-    // IGNORA OUTROS BOTS
+    // IGNORA BOTS
     if (message.author.bot) return;
 
-    // SOMENTE NO CANAL DE RELATÓRIOS
-    if (message.channel.id !== CANAL_RELATORIOS)
+    // VERIFICA SERVIDOR
+    if (
+      message.guild?.id !== SERVIDOR_ID
+    )
+      return;
+
+    // VERIFICA CANAL
+    if (
+      message.channel.id !==
+      CANAL_RELATORIOS
+    )
       return;
 
     // VERIFICA CARGO
-    if (
-      !message.member.roles.cache.has(
+    const possuiCargo =
+      message.member.roles.cache.has(
         CARGO_PERMITIDO
-      )
-    ) {
+      );
+
+    if (!possuiCargo) {
       return;
     }
 
     // ==========================================
-    // COMANDO: !PAINELRELATORIO
+    // PAINEL
     // ==========================================
 
-    if (message.content === "!painelrelatorio") {
+    if (
+      message.content ===
+      "!painelrelatorio"
+    ) {
       const embed = new EmbedBuilder()
         .setColor("#ff0000")
         .setTitle(
@@ -132,28 +122,6 @@ Essa aba será utilizada para:
 
 ━━━━━━━━━━━━━━━━━━
 
-📄 Exemplo de relatório:
-
-📄 Relatório Geral — Membro: Mary Blood  
-📌 Cargo Atual: Médica
-
-📊 Frequência dos membros:
-Boa frequência e participação ativa.
-
-🩺 Avaliação de desempenho:
-Boa comunicação e ótimo RP.
-
-⏳ Tempo de serviço:
-Tempo adequado ao cargo.
-
-✅ Qualidade de serviço:
-Atendimentos rápidos e eficientes.
-
-⭐ Desempenho geral:
-Boa profissional com potencial de crescimento.
-
-━━━━━━━━━━━━━━━━━━
-
 👑 Responsável:
 Diretor Henrique
         `)
@@ -168,39 +136,37 @@ Diretor Henrique
     }
 
     // ==========================================
-    // COMANDO: !RELATORIO
+    // RELATÓRIO
     // ==========================================
 
-    if (message.content.startsWith("!relatorio")) {
-      const args = message.content.split(" ");
+    if (
+      message.content.startsWith(
+        "!relatorio"
+      )
+    ) {
+      const args =
+        message.content.split(" ");
 
-      // MEMBRO
       const membro =
         message.mentions.users.first();
 
       if (!membro) {
         return message.reply(
-          "❌ Você precisa mencionar um membro."
+          "❌ Mencione um membro."
         );
       }
 
-      // CARGO
       const cargo = args[2];
 
-      if (!cargo) {
-        return message.reply(
-          "❌ Informe o cargo."
-        );
-      }
-
-      // VERIFICA SE É CARGO SUPERIOR
       if (
-        !CARGOS_SUPERIORES.includes(cargo)
+        !CARGOS_SUPERIORES.includes(
+          cargo
+        )
       ) {
         return message.reply(`
-❌ Apenas cargos superiores podem utilizar relatórios.
+❌ Cargo inválido.
 
-Cargos permitidos:
+Permitidos:
 • Diretor
 • Vice-Diretor
 • Supervisor
@@ -208,7 +174,6 @@ Cargos permitidos:
         `);
       }
 
-      // DADOS
       const frequencia =
         args[3] || "Não informado";
 
@@ -224,7 +189,6 @@ Cargos permitidos:
       const desempenho =
         args[7] || "Não informado";
 
-      // EMBED
       const embed = new EmbedBuilder()
         .setColor("#00ff88")
         .setTitle("📄 Relatório Geral")
@@ -255,7 +219,8 @@ Cargos permitidos:
             value: avaliacao,
           },
           {
-            name: "⏳ Tempo de serviço",
+            name:
+              "⏳ Tempo de serviço",
             value: tempo,
           },
           {
@@ -264,7 +229,8 @@ Cargos permitidos:
             value: qualidade,
           },
           {
-            name: "⭐ Desempenho geral",
+            name:
+              "⭐ Desempenho geral",
             value: desempenho,
           }
         )
@@ -279,10 +245,6 @@ Cargos permitidos:
     }
   } catch (err) {
     console.log(err);
-
-    message.reply(
-      "❌ Ocorreu um erro ao executar o comando."
-    );
   }
 });
 
