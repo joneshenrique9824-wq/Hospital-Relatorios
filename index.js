@@ -3,7 +3,6 @@ import {
   Client,
   GatewayIntentBits,
   EmbedBuilder,
-  PermissionsBitField,
 } from "discord.js";
 
 // ==========================================
@@ -23,6 +22,12 @@ const client = new Client({
 // CONFIGURAÇÕES
 // ==========================================
 
+// ID DO SERVIDOR
+const SERVIDOR_ID = "1477683902041690342";
+
+// ID DO BOT
+const BOT_ID = "1502475695329382481";
+
 // CANAL DE RELATÓRIOS
 const CANAL_RELATORIOS = "1477683906026406084";
 
@@ -41,10 +46,28 @@ const CARGOS_SUPERIORES = [
 // BOT ONLINE
 // ==========================================
 
-client.once("ready", () => {
+client.once("ready", async () => {
   console.log("=================================");
   console.log(`✅ BOT ONLINE: ${client.user.tag}`);
+  console.log(`🤖 ID DO BOT: ${BOT_ID}`);
+  console.log(`🏥 SERVIDOR: ${SERVIDOR_ID}`);
   console.log("=================================");
+
+  // VERIFICA SERVIDOR
+  const guild = client.guilds.cache.get(
+    SERVIDOR_ID
+  );
+
+  if (!guild) {
+    console.log(
+      "❌ O bot não está no servidor configurado."
+    );
+    return;
+  }
+
+  console.log(
+    `✅ Conectado ao servidor: ${guild.name}`
+  );
 });
 
 // ==========================================
@@ -53,15 +76,22 @@ client.once("ready", () => {
 
 client.on("messageCreate", async (message) => {
   try {
-    // IGNORA BOT
+    // IGNORA OUTROS SERVIDORES
+    if (message.guild?.id !== SERVIDOR_ID)
+      return;
+
+    // IGNORA OUTROS BOTS
     if (message.author.bot) return;
 
-    // SOMENTE NO CANAL CONFIGURADO
-    if (message.channel.id !== CANAL_RELATORIOS) return;
+    // SOMENTE NO CANAL DE RELATÓRIOS
+    if (message.channel.id !== CANAL_RELATORIOS)
+      return;
 
     // VERIFICA CARGO
     if (
-      !message.member.roles.cache.has(CARGO_PERMITIDO)
+      !message.member.roles.cache.has(
+        CARGO_PERMITIDO
+      )
     ) {
       return;
     }
@@ -73,7 +103,9 @@ client.on("messageCreate", async (message) => {
     if (message.content === "!painelrelatorio") {
       const embed = new EmbedBuilder()
         .setColor("#ff0000")
-        .setTitle("📋 Sistema de Relatórios — Hospital")
+        .setTitle(
+          "📋 Sistema de Relatórios — Hospital"
+        )
         .setDescription(`
 Olá @|👑| Diretor (a)  
 @|🎖️| Vice.Diretor (a)  
@@ -143,7 +175,8 @@ Diretor Henrique
       const args = message.content.split(" ");
 
       // MEMBRO
-      const membro = message.mentions.users.first();
+      const membro =
+        message.mentions.users.first();
 
       if (!membro) {
         return message.reply(
@@ -161,7 +194,9 @@ Diretor Henrique
       }
 
       // VERIFICA SE É CARGO SUPERIOR
-      if (!CARGOS_SUPERIORES.includes(cargo)) {
+      if (
+        !CARGOS_SUPERIORES.includes(cargo)
+      ) {
         return message.reply(`
 ❌ Apenas cargos superiores podem utilizar relatórios.
 
@@ -210,7 +245,8 @@ Cargos permitidos:
             inline: true,
           },
           {
-            name: "📊 Frequência dos membros",
+            name:
+              "📊 Frequência dos membros",
             value: frequencia,
           },
           {
