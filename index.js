@@ -9,9 +9,6 @@ import {
 // CLIENT
 // ==========================================
 
-// REMOVIDO O GuildMembers
-// PARA NÃO DAR ERRO DE INTENTS
-
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -21,16 +18,14 @@ const client = new Client({
 });
 
 // ==========================================
-// CONFIGURAÇÕES
+// CONFIG
 // ==========================================
 
 const SERVIDOR_ID = "1477683902041690342";
 
-const CANAL_RELATORIOS =
-  "1477683906026406084";
+const CANAL_RELATORIOS = "1477683906026406084";
 
-const CARGO_PERMITIDO =
-  "1490431614055088128";
+const CARGO_PERMITIDO = "1490431614055088128";
 
 const CARGOS_SUPERIORES = [
   "Diretor",
@@ -40,57 +35,77 @@ const CARGOS_SUPERIORES = [
 ];
 
 // ==========================================
-// BOT ONLINE
+// READY
 // ==========================================
 
-client.once("ready", async () => {
-  console.log("=================================");
-  console.log(
-    `✅ BOT ONLINE: ${client.user.tag}`
-  );
-  console.log("=================================");
+client.once("ready", () => {
+  console.log(`✅ BOT ONLINE: ${client.user.tag}`);
 });
 
 // ==========================================
-// SISTEMA
+// COMANDOS
 // ==========================================
 
 client.on("messageCreate", async (message) => {
   try {
-    // IGNORA BOTS
+    // IGNORAR BOT
     if (message.author.bot) return;
 
-    // VERIFICA SERVIDOR
-    if (
-      message.guild?.id !== SERVIDOR_ID
-    )
+    // SERVIDOR
+    if (message.guild?.id !== SERVIDOR_ID)
       return;
 
-    // VERIFICA CANAL
-    if (
-      message.channel.id !==
-      CANAL_RELATORIOS
-    )
+    // CANAL
+    if (message.channel.id !== CANAL_RELATORIOS)
       return;
 
     // VERIFICA CARGO
-    const possuiCargo =
-      message.member.roles.cache.has(
+    if (
+      !message.member.roles.cache.has(
         CARGO_PERMITIDO
-      );
-
-    if (!possuiCargo) {
+      )
+    ) {
       return;
     }
 
     // ==========================================
-    // PAINEL
+    // COMANDO AJUDA
     // ==========================================
 
-    if (
-      message.content ===
-      "!painelrelatorio"
-    ) {
+    if (message.content === "!ajuda") {
+      const embed = new EmbedBuilder()
+        .setColor("#0099ff")
+        .setTitle("📋 Comandos do Bot")
+        .setDescription(`
+📌 Comandos disponíveis:
+
+\`!painelrelatorio\`
+➡️ Envia o painel do sistema.
+
+\`!relatorio\`
+➡️ Cria um relatório.
+
+━━━━━━━━━━━━━━━━━━
+
+📄 Exemplo:
+
+\`!relatorio @Mary Diretor Boa Excelente 6Meses Ótima MuitoBoa\`
+
+━━━━━━━━━━━━━━━━━━
+
+👑 Apenas superiores podem usar.
+        `);
+
+      return message.channel.send({
+        embeds: [embed],
+      });
+    }
+
+    // ==========================================
+    // COMANDO PAINEL
+    // ==========================================
+
+    if (message.content === "!painelrelatorio") {
       const embed = new EmbedBuilder()
         .setColor("#ff0000")
         .setTitle(
@@ -113,7 +128,7 @@ Essa aba será utilizada para:
 
 ━━━━━━━━━━━━━━━━━━
 
-📌 Somente cargos superiores podem realizar relatórios.
+📌 Apenas superiores podem realizar relatórios.
 
 • 👑 Diretor  
 • 🎖️ Vice-Diretor  
@@ -130,13 +145,13 @@ Diretor Henrique
         })
         .setTimestamp();
 
-      await message.channel.send({
+      return message.channel.send({
         embeds: [embed],
       });
     }
 
     // ==========================================
-    // RELATÓRIO
+    // COMANDO RELATÓRIO
     // ==========================================
 
     if (
@@ -157,6 +172,12 @@ Diretor Henrique
       }
 
       const cargo = args[2];
+
+      if (!cargo) {
+        return message.reply(
+          "❌ Informe o cargo."
+        );
+      }
 
       if (
         !CARGOS_SUPERIORES.includes(
@@ -239,7 +260,7 @@ Permitidos:
         })
         .setTimestamp();
 
-      await message.channel.send({
+      return message.channel.send({
         embeds: [embed],
       });
     }
