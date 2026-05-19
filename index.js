@@ -6,7 +6,7 @@ const {
 } = require("discord.js");
 
 const TOKEN = process.env.TOKEN;
-const DONO_ID = "1456655598593511539";
+const DONO_ID = "1174745079630549014";
 
 if (!TOKEN) {
   console.log("❌ TOKEN não encontrado nas Variables do Railway.");
